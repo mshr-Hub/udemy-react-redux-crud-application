@@ -4,12 +4,19 @@ import { Field, reduxForm } from 'redux-form'
 import { Link } from 'react-router-dom'
 
 import { getEvent, deleteEvent, putEvent } from '../actions'
+// import mapStateToProps from 'react-redux/lib/connect/mapStateToProps';
+import events from '../reducers/events';
 
 class EventsShow extends Component {
   constructor(props) {
     super(props)
     this.onSubmit = this.onSubmit.bind(this)
     this.onDeleteClick = this.onDeleteClick.bind(this)
+  }
+
+  componentDidMount() {
+    const { id } = this.props.match.params
+    if (id) this.props.getEvent(id)
   }
 
   renderField(field) {
@@ -61,8 +68,13 @@ const validate = values => {
   return errors
 }
 
-const mapDispatchToProps = ({ deleteEvent })
+const mapStateToProps = (state, ownProps) => {
+  const event = state.events[ownProps.match.params.id]
+  return { initialValues: event, event }
+}
 
-export default connect(null, mapDispatchToProps)(
-  reduxForm({ validate, form: 'eventShowFrom' })(EventsShow)
+const mapDispatchToProps = ({ deleteEvent, getEvent })
+
+export default connect(mapStateToProps, mapDispatchToProps)(
+  reduxForm({ validate, form: 'eventShowFrom', enableReinitialize: true })(EventsShow)
 )
